@@ -31,7 +31,7 @@ JenkinJobs = React.createClass({
         if (a.buildIndex > b.buildIndex) {
           return -1;
         }
-        if (a.buildIndex > b.buildIndex) {
+        if (a.buildIndex < b.buildIndex) {
           return 1;
         }
         return 0;
@@ -50,8 +50,6 @@ JenkinJobs = React.createClass({
     const buildTitle = arguments[0];
     const buildData = arguments[1];
     return buildData.map(function(data) {
-      console.log('data');
-      console.log(data);
       return <li>{data}</li>;
     });
 
