@@ -3,21 +3,38 @@
 JenkinJobs = React.createClass({
   mixins: [ReactMeteorData],
   getMeteorData () {
-    var builds = Posts.find({}).fetch();
-    var groupedBuilds = {};
+    const builds = Posts.find({}).fetch();
+
+    return {
+      Builds: this.groupSortBuilds(builds)
+    };
+  },
+  groupSortBuilds(builds) {
+    let groupedBuilds = {};
     builds.forEach(function(build) {
       let titleContent = build.build.title.split(" ");
       if (groupedBuilds[titleContent[0]]) {
-        groupedBuilds[titleContent[0]].push(build);
+        groupedBuilds[titleContent[0]].push({build: build,
+                                             buildIndex: parseInt(titleContent[1].slice(1,titleContent[1].length))});
       } else {
-        groupedBuilds[titleContent[0]] = [build];
+        groupedBuilds[titleContent[0]] = [{build: build,
+                                             buildIndex: parseInt(titleContent[1].slice(1,titleContent[1].length))}];
+
       }
     });
-    console.log('groupedBuilds');
-    console.log(groupedBuilds);
-    return {
-      Builds: builds
-    };
+
+    for (var title in groupedBuilds) {
+      groupedBuilds[title].sort(function(a,b) {
+        if (a.buildIndex > b.buildIndex) {
+          return -1;
+        }
+        if (a.buildIndex > b.buildIndex) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+    return groupedBuilds;
   },
   displayBuildTags() {
     return <ul>
@@ -26,20 +43,34 @@ JenkinJobs = React.createClass({
             })}
           </ul>;
   },
-  getJobs() {
-    return this.data.Builds.map(function(data) {
-        var titleArray = data.build.title.split(" ");
-        console.log('titleArray');
-        console.log(titleArray);
-        return <li>{data.build.title}{data.pubDate}{this.displayBuildTags(data.build.tags)}</li>;
-    }.bind(this));
+  buildBuildRow() {
+    const buildTitle = arguments[0];
+    const buildData = arguments[1];
+    return buildData.map(function(data) {
+      console.log('data');
+      console.log(data);
+      return <li>{data}</li>;
+    });
+
+  },
+  displayBuildQs() {
+    let buildGroups = [];
+    for (var build in this.data.Builds) {
+      buildGroups.push(
+                       <span>
+                         <h1>{build}</h1>
+                         <ul>
+                            {this.buildBuildRow(build, this.data.Builds[build])}
+                         </ul>
+                       </span>
+                      );
+    }
+    return buildGroups;
   },
   render() {
     return (
       <span>
-        <ul>
-          {this.getJobs()}
-        </ul>
+        {this.displayBuildQs()}
       </span>
     );
   }
