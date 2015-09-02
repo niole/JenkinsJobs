@@ -10,8 +10,7 @@ JenkinJobs = React.createClass({
   getJobs() {
     return this.data.Builds.map(function(data) {
         console.log('data: ');
-        console.log(data);
-        return <li>{data.build.title}</li>;
+        return <li>{data.build.title}{data.pubDate}</li>;
     });
   },
   render() {
