@@ -1,6 +1,5 @@
 Meteor.startup(function() {
   var Feeds = [
-               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/rssLatest",
                "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop1.0,label=spark-test/rssAll"
               ];
 

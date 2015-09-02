@@ -13,6 +13,10 @@ JenkinJobs = React.createClass({
     let groupedBuilds = {};
     builds.forEach(function(build) {
       let buildNumStr = build.build.title.match(/#([0-9]+)/g);
+      let titleStatus = build.build.title.match(/\(([a-zA-Z_ ]+)\)/g);
+      console.log('titleStatus');
+      console.log(titleStatus);
+
       let titleContent = build.build.title.split(" ");
       const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
 
@@ -49,8 +53,10 @@ JenkinJobs = React.createClass({
   buildBuildRow() {
     const buildTitle = arguments[0];
     const buildData = arguments[1];
-    return buildData.map(function(data) {
-      return <li>{data}</li>;
+    return buildData.map( data => {
+      console.log('data');
+      console.log(data);
+      return <li>{data}{this.displayBuildTags(data.build.build.tags)}</li>;
     });
 
   },
