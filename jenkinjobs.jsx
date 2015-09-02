@@ -12,13 +12,16 @@ JenkinJobs = React.createClass({
   groupSortBuilds(builds) {
     let groupedBuilds = {};
     builds.forEach(function(build) {
+      let buildNumStr = build.build.title.match(/#([0-9]+)/g);
       let titleContent = build.build.title.split(" ");
+      const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
+
       if (groupedBuilds[titleContent[0]]) {
         groupedBuilds[titleContent[0]].push({build: build,
-                                             buildIndex: parseInt(titleContent[1].slice(1,titleContent[1].length))});
+                                             buildIndex: buildNumber});
       } else {
         groupedBuilds[titleContent[0]] = [{build: build,
-                                             buildIndex: parseInt(titleContent[1].slice(1,titleContent[1].length))}];
+                                             buildIndex: buildNumber}];
 
       }
     });
