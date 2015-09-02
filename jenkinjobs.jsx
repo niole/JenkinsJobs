@@ -10,8 +10,8 @@ JenkinJobs = React.createClass({
     };
   },
   getBuildStatus() {
-    const statusString = arguments[0];
-    if (!statusString || statusString.indexOf('broken') > -1) {
+    const statusString = arguments[0][0];
+    if (statusString.indexOf('broken') > -1) {
       return false;
     }
     return true;
@@ -21,9 +21,8 @@ JenkinJobs = React.createClass({
     builds.forEach( build => {
       let buildNumStr = build.build.title.match(/#([0-9]+)/g);
       const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
-      const titleStatus = build.build.title.match(/\(([a-zA-Z_ ]+)\)/g);
+      const titleStatus = build.build.title.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
       const title = build.build.title.split(" ")[0];
-
       //when titleStatus contains 'normal', or 'broken', indicates
       //a change in state for build config.
       //when titleStatus contains 'normal', aka a change back to 
@@ -66,7 +65,7 @@ JenkinJobs = React.createClass({
     const buildTitle = arguments[0];
     const buildData = arguments[1];
     return buildData.map( data => {
-      return <li>{data}{this.displayBuildTags(data.build.build.tags)}</li>;
+      return <li>{data}{this.displayBuildTags(data.build.build.tags)} build status: {data.buildStatus ? 'stable' : 'broken'}</li>;
     });
 
   },
