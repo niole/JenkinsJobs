@@ -9,23 +9,39 @@ JenkinJobs = React.createClass({
       Builds: this.groupSortBuilds(builds)
     };
   },
+  getBuildStatus() {
+    const statusString = arguments[0];
+    console.log(statusString);
+    if (!statusString || statusString.indexOf('broken') > -1) {
+      console.log(false);
+      return false;
+    } else {
+      console.log(true);
+      return true;
+    }
+  },
   groupSortBuilds(builds) {
     let groupedBuilds = {};
-    builds.forEach(function(build) {
+    builds.forEach( build => {
       let buildNumStr = build.build.title.match(/#([0-9]+)/g);
       let titleStatus = build.build.title.match(/\(([a-zA-Z_ ]+)\)/g);
-      console.log('titleStatus');
-      console.log(titleStatus);
+      let title = build.build.title.split(" ")[0];
 
-      let titleContent = build.build.title.split(" ");
+      //when titleStatus contains 'normal', or 'broken', indicates
+      //a change in state for build config.
+      //when titleStatus contains 'normal', aka a change back to 
+      //'stable', this is not reflected in the object's tags
+      //otherwise, titleStatus contains 'stable'
       const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
 
-      if (groupedBuilds[titleContent[0]]) {
-        groupedBuilds[titleContent[0]].push({build: build,
-                                             buildIndex: buildNumber});
+      if (groupedBuilds[title]) {
+        groupedBuilds[title].push({build: build,
+                                   buildStatus: this.getBuildStatus(titleStatus),
+                                   buildIndex: buildNumber});
       } else {
-        groupedBuilds[titleContent[0]] = [{build: build,
-                                             buildIndex: buildNumber}];
+        groupedBuilds[title] = [{build: build,
+                                 buildStatus: this.getBuildStatus(titleStatus),
+                                 buildIndex: buildNumber}];
 
       }
     });
