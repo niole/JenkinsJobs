@@ -18,16 +18,15 @@ JenkinJobs = React.createClass({
   },
   groupSortBuilds(builds) {
     let groupedBuilds = {};
+
     builds.forEach( build => {
+      console.log('build');
+      console.log(build);
+
       let buildNumStr = build.build.title.match(/#([0-9]+)/g);
       const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
       const titleStatus = build.build.title.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
       const title = build.build.title.split(" ")[0];
-      //when titleStatus contains 'normal', or 'broken', indicates
-      //a change in state for build config.
-      //when titleStatus contains 'normal', aka a change back to 
-      //'stable', this is not reflected in the object's tags
-      //otherwise, titleStatus contains 'stable'
 
       if (groupedBuilds[title]) {
         groupedBuilds[title].push({build: build,
@@ -65,7 +64,11 @@ JenkinJobs = React.createClass({
     const buildTitle = arguments[0];
     const buildData = arguments[1];
     return buildData.map( data => {
-      return <li>{data}{this.displayBuildTags(data.build.build.tags)} build status: {data.buildStatus ? 'stable' : 'broken'}</li>;
+      return <li className="config-data">
+                build status: {data.buildStatus ? 'stable' : 'broken'} <br/>
+                {data.build.pubDate}
+                {this.displayBuildTags(data.build.build.tags)}
+             </li>;
     });
 
   },
@@ -74,11 +77,16 @@ JenkinJobs = React.createClass({
     for (var build in this.data.Builds) {
       buildGroups.push(
                        <span>
-                         <h1>{build}</h1>
-                         <h2>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h2>
-                         <ul>
-                            {this.buildBuildRow(build, this.data.Builds[build])}
-                         </ul>
+                          <div className="build-config-header">
+                             <h1>{this.data.Builds[build][0].build.title}</h1>
+                             <h2>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h2>
+                          </div>
+
+                         <li className="config-row">
+                             <ul className="config-data-box">
+                                {this.buildBuildRow(build, this.data.Builds[build])}
+                             </ul>
+                         </li>
                        </span>
                       );
     }
@@ -86,9 +94,9 @@ JenkinJobs = React.createClass({
   },
   render() {
     return (
-      <span>
+      <ul>
         {this.displayBuildQs()}
-      </span>
+      </ul>
     );
   }
 });

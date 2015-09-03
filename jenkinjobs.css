@@ -1,1 +1,22 @@
 /* CSS declarations go here */
+.line {
+    fill: none;
+    stroke: url(#line-gradient);
+    stroke-width: 10px;
+}
+
+.config-data {
+  display: inline-block;
+  list-style-type: none;
+  padding: 1em;
+}
+
+.config-data-box {
+  list-style-type: none;
+  white-space:nowrap;
+  overflow-x:auto;
+}
+
+.config-row {
+  padding: 1em;
+}
