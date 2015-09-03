@@ -13,7 +13,8 @@ Meteor.startup(function() {
   scrapedFeeds.forEach(function(F) {
     F.items.forEach(function(build) {
 
-      if (Posts.find( { pubDate: build.title }).count() < 1) {
+      if (Posts.find( { statusTitle: build.title }).count() < 1) {
+        console.log('nothing with that title');
 
         var Build = {
               pubDate: build.pubDate.toString(),
