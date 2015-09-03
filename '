@@ -1,26 +1,12 @@
+//group by group title
+
 JenkinJobs = React.createClass({
-  getInitialState() {
-    return { startIndex: 0 };
-  },
   mixins: [ReactMeteorData],
   getMeteorData () {
-    const builds = Builds.find({}).fetch();
-    const now = new Date();
-    const startdate =new Date(now.getTime() - 1*24*3600000);
-    const postsInRange = Posts.find({ "build.pubDate": { $gt: startdate, $lt: now } }).fetch();
-    const allBuilds = builds.map( build => {
-      return postsInRange.filter( post => {
-        if (post.buildId === build._id) {
-          return post;
-        }
-      });
-    });
-    allBuilds.sort(function(a,b) {
-      return a[0].title - b[0].title;
-    });
+    const builds = Posts.find({}).fetch();
 
     return {
-      Builds: this.groupSortBuilds(allBuilds)
+      Builds: this.groupSortBuilds(builds)
     };
   },
   getBuildStatus() {
@@ -91,24 +77,17 @@ JenkinJobs = React.createClass({
                           <td>
                              <h1>{this.data.Builds[build][0].build.title}</h1>
                              <h2>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h2>
-                          </td>
+                          </tdc>
                           {this.buildBuildRow(build, this.data.Builds[build])}
                        </tr>
                       );
     }
     return buildGroups;
   },
-  displayColHeaders() {
-  },
   render() {
     return (
       <table>
-        <thead>
-          <tr>{this.displayColHeaders()}</tr>
-        </thead>
-        <tbody>
-          {this.displayBuildQs()}
-        </tbody>
+        {this.displayBuildQs()}
       </table>
     );
   }
