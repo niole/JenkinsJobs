@@ -20,9 +20,6 @@ JenkinJobs = React.createClass({
     let groupedBuilds = {};
 
     builds.forEach( build => {
-      console.log('build');
-      console.log(build);
-
       let buildNumStr = build.build.title.match(/#([0-9]+)/g);
       const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
       const titleStatus = build.build.title.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
