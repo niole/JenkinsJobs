@@ -1,10 +1,16 @@
 JenkinJobs = React.createClass({
   getInitialState() {
     return { startIndex: 0,
-             dayRange: 1,
+             dayRange: 3,
              fromDate: new Date()
              };
 
+  },
+  componentDidMount() {
+    //stick circles in view
+  },
+  componentDidUpdate() {
+    //stick circles in view
   },
   mixins: [ReactMeteorData],
   getMeteorData () {
@@ -57,8 +63,7 @@ JenkinJobs = React.createClass({
         const titleStatus = build.statusTitle.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
         const title = build.title;
 
-        if (groupedBuilds[title]) {
-          groupedBuilds[title].push({build: build,
+        if (groupedBuilds[title]) { groupedBuilds[title].push({build: build,
                                      buildStatus: this.getBuildStatus(titleStatus),
                                      buildIndex: buildNumber});
         } else {
@@ -113,17 +118,26 @@ JenkinJobs = React.createClass({
   buildBuildRow(headers, buildData) {
 
     return this.parseCellData(buildData, headers).map( group => {
+      const cellWidth = {width: (group.length*10).toString()+"px"};
+
       return <td>
-         {_.map(group, cellData => {
-              return (
-                <div>
-                  build status: {cellData.buildStatus ? 'stable' : 'broken'}
-                  {cellData.build.pubDate}
-                  {this.displayBuildTags(cellData.build.build.tags)}
-                </div>);
-           })
-        }
-      </td>;
+               <div style={cellWidth}>
+                 {_.map(group, cellData => {
+                      return (
+                        <div className="config-data">
+                          <svg className="status-circle" width="10" height="10">
+                            <circle cx="5" cy="5" r="5" fill={cellData.buildStatus ? 'green' : 'red'}/>
+                          </svg>
+                          <span className="cell-info">
+                            {cellData.build.pubDate}
+                            {this.displayBuildTags(cellData.build.build.tags)}
+                            build status: {cellData.buildStatus ? 'stable' : 'broken'}
+                          </span>
+                        </div>);
+                   })
+                }
+              </div>
+            </td>;
     });
 
   },

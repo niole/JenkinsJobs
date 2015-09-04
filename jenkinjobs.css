@@ -6,17 +6,17 @@
 }
 
 .config-data {
-  display: inline-block;
-  list-style-type: none;
-  padding: 1em;
+  float: right;
+  position: relative;
+}
+.status-circle:hover~.cell-info {
+  z-index: 999;
+  display: block;
+
 }
 
-.config-data-box {
-  list-style-type: none;
-  white-space:nowrap;
-  overflow-x:auto;
-}
-
-.config-row {
-  padding: 1em;
+.cell-info {
+  z-index: 999;
+  position: absolute;
+  display: none;
 }
