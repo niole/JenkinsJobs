@@ -89,15 +89,41 @@ JenkinJobs = React.createClass({
             })}
           </ul>;
   },
-  buildBuildRow() {
-    const buildTitle = arguments[0];
-    const buildData = arguments[1];
-    return buildData.map( data => {
+  getTableIndex(dateData, startDate) {
+    let timeDiff = Math.abs(startDate.getTime() - dateData.getTime());
+    return diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  },
+  parseCellData(buildData,headers) {
+    var tableData = [];
+    var tableIndex;
+    var data;
+    var i;
+
+    for (i=0; i<buildData.length; i++) {
+        data = buildData[i];
+        tableIndex = this.getTableIndex(new Date(data.build.pubDate), headers[1])-1;
+        if (tableData[tableIndex]) {
+          tableData[tableIndex].push(data);
+        } else {
+          tableData.push([data]);
+        }
+    }
+    return tableData;
+  },
+  buildBuildRow(headers, buildData) {
+
+    return this.parseCellData(buildData, headers).map( group => {
       return <td>
-                build status: {data.buildStatus ? 'stable' : 'broken'} <br/>
-                {data.build.pubDate}
-                {this.displayBuildTags(data.build.build.tags)}
-             </td>;
+         {_.map(group, cellData => {
+              return (
+                <div>
+                  build status: {cellData.buildStatus ? 'stable' : 'broken'}
+                  {cellData.build.pubDate}
+                  {this.displayBuildTags(cellData.build.build.tags)}
+                </div>);
+           })
+        }
+      </td>;
     });
 
   },
@@ -110,13 +136,16 @@ JenkinJobs = React.createClass({
                              <h4>{this.data.Builds[build][0].build.title}</h4>
                              <h4>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h4>
                           </td>
-                          {this.buildBuildRow(build, this.data.Builds[build])}
+                          {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
                        </tr>
                       );
     }
     return buildGroups;
   },
   displayColHeaders() {
+    return _.map(this.data.Headers, title => {
+      return <td>{title.toString()}</td>;
+    });
   },
   render() {
     return (
