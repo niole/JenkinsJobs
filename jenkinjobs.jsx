@@ -1,55 +1,73 @@
 JenkinJobs = React.createClass({
   getInitialState() {
-    return { startIndex: 0 };
+    return { startIndex: 0,
+             dayRange: 1,
+             fromDate: new Date()
+             };
+
   },
   mixins: [ReactMeteorData],
   getMeteorData () {
-    const builds = Builds.find({}).fetch();
-    const now = new Date();
-    const startdate =new Date(now.getTime() - 1*24*3600000);
-    const postsInRange = Posts.find({ "build.pubDate": { $gt: startdate, $lt: now } }).fetch();
+    let startdate =new Date(this.state.fromDate.getTime() - this.state.dayRange*24*3600000);
+    let builds = Builds.find({}).fetch();
     const allBuilds = builds.map( build => {
-      return postsInRange.filter( post => {
-        if (post.buildId === build._id) {
-          return post;
+      let buildArray = [];
+      let postsInRange = Posts.find({ buildId: build._id }).fetch();
+      postsInRange.forEach( post => {
+
+        if (post.build.pubDate <= this.state.fromDate && post.build.pubDate >= startdate) {
+          buildArray.push(post);
         }
       });
+      return buildArray;
     });
+
+    this.groupBuildsOnTitle(allBuilds);
+
+    return {
+      Builds: this.sortEachBuild(allBuilds),
+      Headers: ["build titles"].concat(this.getRange(this.state.fromDate, this.state.dayRange))
+    };
+  },
+  groupBuildsOnTitle(allBuilds) {
     allBuilds.sort(function(a,b) {
       return a[0].title - b[0].title;
     });
-
-    return {
-      Builds: this.groupSortBuilds(allBuilds)
-    };
   },
-  getBuildStatus() {
-    const statusString = arguments[0][0];
-    if (statusString.indexOf('broken') > -1) {
+  getRange(start, range) {
+    //assumes isodates of the "string" form
+    //range is number of days into the past
+    //includes the current day
+    return _.range(range+1).map( mult => {
+      return new Date(start.getTime() - mult*24*3600000);
+    });
+  },
+  getBuildStatus(titleArray) {
+    if (titleArray[0].indexOf('broken') > -1) {
       return false;
     }
     return true;
   },
-  groupSortBuilds(builds) {
+  sortEachBuild(allBuilds) {
     let groupedBuilds = {};
+    allBuilds.forEach( builds => {
+      builds.forEach( build => {
+        let buildNumStr = build.statusTitle.match(/#([0-9]+)/g);
+        const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
+        const titleStatus = build.statusTitle.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
+        const title = build.title;
 
-    builds.forEach( build => {
-      let buildNumStr = build.build.title.match(/#([0-9]+)/g);
-      const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
-      const titleStatus = build.build.title.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
-      const title = build.build.title.split(" ")[0];
-
-      if (groupedBuilds[title]) {
-        groupedBuilds[title].push({build: build,
+        if (groupedBuilds[title]) {
+          groupedBuilds[title].push({build: build,
+                                     buildStatus: this.getBuildStatus(titleStatus),
+                                     buildIndex: buildNumber});
+        } else {
+          groupedBuilds[title] = [{build: build,
                                    buildStatus: this.getBuildStatus(titleStatus),
-                                   buildIndex: buildNumber});
-      } else {
-        groupedBuilds[title] = [{build: build,
-                                 buildStatus: this.getBuildStatus(titleStatus),
-                                 buildIndex: buildNumber}];
-
-      }
-    });
+                                   buildIndex: buildNumber}];
+        }
+      });
+   });
 
     for (var title in groupedBuilds) {
       groupedBuilds[title].sort(function(a,b) {
@@ -89,8 +107,8 @@ JenkinJobs = React.createClass({
       buildGroups.push(
                        <tr>
                           <td>
-                             <h1>{this.data.Builds[build][0].build.title}</h1>
-                             <h2>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h2>
+                             <h4>{this.data.Builds[build][0].build.title}</h4>
+                             <h4>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h4>
                           </td>
                           {this.buildBuildRow(build, this.data.Builds[build])}
                        </tr>
