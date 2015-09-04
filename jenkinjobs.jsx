@@ -6,12 +6,6 @@ JenkinJobs = React.createClass({
              };
 
   },
-  componentDidMount() {
-    //stick circles in view
-  },
-  componentDidUpdate() {
-    //stick circles in view
-  },
   mixins: [ReactMeteorData],
   getMeteorData () {
     let startdate =new Date(this.state.fromDate.getTime() - this.state.dayRange*24*3600000);
@@ -143,7 +137,7 @@ JenkinJobs = React.createClass({
   },
   displayBuildQs() {
     let buildGroups = [];
-    for (var build in this.data.Builds) {
+    for (let build in this.data.Builds) {
       buildGroups.push(
                        <tr>
                           <td>
@@ -157,8 +151,20 @@ JenkinJobs = React.createClass({
     return buildGroups;
   },
   displayColHeaders() {
+    let displayTitle;
+    const monthDict = {1: 'Jan', 2: 'Feb',3:'Mar', 4:'Apr', 5:'May',
+                       6: 'Jun', 7:'Jul', 8: 'Aug', 9: 'Sep',10: 'Oct',
+                       11: 'Nov', 12: 'Dec'};
     return _.map(this.data.Headers, title => {
-      return <td>{title.toString()}</td>;
+      if (typeof title !== 'string') {
+        //formats title to day.month.year
+        displayTitle = title.getDay().toString()+'.'+
+                        monthDict[title.getMonth()]+'.'+
+                        title.getFullYear().toString();
+      } else {
+        displayTitle = title;
+      }
+      return <td>{displayTitle}</td>;
     });
   },
   render() {
