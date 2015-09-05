@@ -36,7 +36,7 @@ JenkinJobs = React.createClass({
   getRange(start, range) {
     //assumes isodate objects
     //range: days into the past, include current day
-    return _.range(range+1).map( mult => {
+    return _.range(range).map( mult => {
       return new Date(start.getTime() - mult*24*3600000);
     });
   },
@@ -56,16 +56,16 @@ JenkinJobs = React.createClass({
         const title = build.title;
         const buildConfig = build.title.match(/.*?^(?:(?!\/).)*/g)[0].replace(/-/gi,' ');
         const buildConfigDesc = build.title.match(/\/([^=]+)/g)[0].replace(/[_\/]/g,' ').trim();
-        let buildLabels = build.title.match(/=([a-zA-Z0-9.-]+)/g);
-        buildLabels[0] = buildLabels[0].replace(/=/,' ').trim();
-        buildLabels[1] = buildLabels[1].replace(/=/,' ').trim();
+        const buildLabels = _.map(build.title.match(/=([a-zA-Z0-9.-]+)/g), label => {
+          return label.replace(/=/,' ').trim();
+        });
 
 
         if (groupedBuilds[title]) { groupedBuilds[title].push({
                                      build: build,
-                                     configTitle: buildConfig[0],
+                                     configTitle: buildConfig,
                                      buildLabels: buildLabels,
-                                     configDesc: buildConfigDesc[0],
+                                     configDesc: buildConfigDesc,
                                      buildStatus: this.getBuildStatus(titleStatus),
                                      buildIndex: buildNumber});
         } else {
@@ -81,10 +81,16 @@ JenkinJobs = React.createClass({
 
     for (var title in groupedBuilds) {
       groupedBuilds[title].sort(function(a,b) {
-        if (a.buildIndex > b.buildIndex) {
+        let A = new Date(a.build.pubDate);
+        let B = new Date(b.build.pubDate);
+
+
+        console.log(B.getTime());
+
+        if (A.getTime() > B.getTime()) {
           return -1;
         }
-        if (a.buildIndex < b.buildIndex) {
+        if (A.getTime() < B.getTime()) {
           return 1;
         }
         return 0;
@@ -105,13 +111,9 @@ JenkinJobs = React.createClass({
   },
   parseCellData(buildData,headers) {
     var tableData = [];
-    var tableIndex;
-    var data;
-    var i;
-
-    for (i=0; i<buildData.length; i++) {
-        data = buildData[i];
-        tableIndex = this.getTableIndex(new Date(data.build.pubDate), headers[1])-1;
+    for (var i=0; i<buildData.length; i++) {
+        var data = buildData[i];
+        var tableIndex = this.getTableIndex(new Date(data.build.pubDate), headers[1])-1;
         if (tableData[tableIndex]) {
           tableData[tableIndex].push(data);
         } else {
@@ -153,10 +155,12 @@ JenkinJobs = React.createClass({
       buildGroups.push(
                        <tr>
                           <td>
-                             <p>{buildAttr.configTitle}</p>
-                             <p>{buildAttr.configDesc}</p>
-                             <p>{buildAttr.buildLabels[0]}</p>
-                             <p>{buildAttr.buildLabels[1]}</p>
+                             <p>
+                               <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
+                               {buildAttr.configDesc.toLowerCase()}: <br/>
+                               {buildAttr.buildLabels[0].toLowerCase()},&nbsp;
+                               {buildAttr.buildLabels[1].toLowerCase()}
+                             </p>
                           </td>
                           {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
                        </tr>
@@ -165,16 +169,12 @@ JenkinJobs = React.createClass({
     return buildGroups;
   },
   displayColHeaders() {
-    const monthDict = {1: 'Jan', 2: 'Feb',3:'Mar', 4:'Apr', 5:'May',
-                       6: 'Jun', 7:'Jul', 8: 'Aug', 9: 'Sep',10: 'Oct',
-                       11: 'Nov', 12: 'Dec'};
     return _.map(this.data.Headers, title => {
       let displayTitle = title;
       if (typeof title !== 'string') {
         //formats title to day.month.year
-        displayTitle = title.getDay().toString()+'.'+
-                        monthDict[title.getMonth()]+'.'+
-                        title.getFullYear().toString();
+        const titleDate = title.toString().split(' ');
+        displayTitle = titleDate[2]+'.'+titleDate[1]+'.'+titleDate[3];
       }
       return <td>{displayTitle}</td>;
     });
