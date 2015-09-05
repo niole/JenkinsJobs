@@ -14,7 +14,6 @@ JenkinJobs = React.createClass({
       let buildArray = [];
       let postsInRange = Posts.find({ buildId: build._id }).fetch();
       postsInRange.forEach( post => {
-
         if (post.build.pubDate <= this.state.fromDate && post.build.pubDate >= startdate) {
           buildArray.push(post);
         }
@@ -35,9 +34,8 @@ JenkinJobs = React.createClass({
     });
   },
   getRange(start, range) {
-    //assumes isodates of the "string" form
-    //range is number of days into the past
-    //includes the current day
+    //assumes isodate objects
+    //range: days into the past, include current day
     return _.range(range+1).map( mult => {
       return new Date(start.getTime() - mult*24*3600000);
     });
@@ -56,12 +54,25 @@ JenkinJobs = React.createClass({
         const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
         const titleStatus = build.statusTitle.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
         const title = build.title;
+        const buildConfig = build.title.match(/.*?^(?:(?!\/).)*/g)[0].replace(/-/gi,' ');
+        const buildConfigDesc = build.title.match(/\/([^=]+)/g)[0].replace(/[_\/]/g,' ').trim();
+        let buildLabels = build.title.match(/=([a-zA-Z0-9.-]+)/g);
+        buildLabels[0] = buildLabels[0].replace(/=/,' ').trim();
+        buildLabels[1] = buildLabels[1].replace(/=/,' ').trim();
 
-        if (groupedBuilds[title]) { groupedBuilds[title].push({build: build,
+
+        if (groupedBuilds[title]) { groupedBuilds[title].push({
+                                     build: build,
+                                     configTitle: buildConfig[0],
+                                     buildLabels: buildLabels,
+                                     configDesc: buildConfigDesc[0],
                                      buildStatus: this.getBuildStatus(titleStatus),
                                      buildIndex: buildNumber});
         } else {
           groupedBuilds[title] = [{build: build,
+                                   configTitle: buildConfig,
+                                   buildLabels: buildLabels,
+                                   configDesc: buildConfigDesc,
                                    buildStatus: this.getBuildStatus(titleStatus),
                                    buildIndex: buildNumber}];
         }
@@ -138,11 +149,14 @@ JenkinJobs = React.createClass({
   displayBuildQs() {
     let buildGroups = [];
     for (let build in this.data.Builds) {
+      let buildAttr = this.data.Builds[build][0];
       buildGroups.push(
                        <tr>
                           <td>
-                             <h4>{this.data.Builds[build][0].build.title}</h4>
-                             <h4>current status: {this.data.Builds[build][0].buildStatus ? 'stable' : 'broken'}</h4>
+                             <p>{buildAttr.configTitle}</p>
+                             <p>{buildAttr.configDesc}</p>
+                             <p>{buildAttr.buildLabels[0]}</p>
+                             <p>{buildAttr.buildLabels[1]}</p>
                           </td>
                           {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
                        </tr>
@@ -151,18 +165,16 @@ JenkinJobs = React.createClass({
     return buildGroups;
   },
   displayColHeaders() {
-    let displayTitle;
     const monthDict = {1: 'Jan', 2: 'Feb',3:'Mar', 4:'Apr', 5:'May',
                        6: 'Jun', 7:'Jul', 8: 'Aug', 9: 'Sep',10: 'Oct',
                        11: 'Nov', 12: 'Dec'};
     return _.map(this.data.Headers, title => {
+      let displayTitle = title;
       if (typeof title !== 'string') {
         //formats title to day.month.year
         displayTitle = title.getDay().toString()+'.'+
                         monthDict[title.getMonth()]+'.'+
                         title.getFullYear().toString();
-      } else {
-        displayTitle = title;
       }
       return <td>{displayTitle}</td>;
     });
