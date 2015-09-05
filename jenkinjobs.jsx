@@ -10,7 +10,8 @@ JenkinJobs = React.createClass({
   getMeteorData () {
     let startdate =new Date(this.state.fromDate.getTime() - this.state.dayRange*24*3600000);
     let builds = Builds.find({}).fetch();
-    const allBuilds = builds.map( build => {
+    let allBuilds = [];
+      builds.forEach( build => {
       let buildArray = [];
       let postsInRange = Posts.find({ buildId: build._id }).fetch();
       postsInRange.forEach( post => {
@@ -18,19 +19,26 @@ JenkinJobs = React.createClass({
           buildArray.push(post);
         }
       });
-      return buildArray;
+      allBuilds.push(buildArray);
     });
-
     this.groupBuildsOnTitle(allBuilds);
 
     return {
-      Builds: this.sortEachBuild(allBuilds),
-      Headers: ["build titles"].concat(this.getRange(this.state.fromDate, this.state.dayRange))
+      Builds: allBuilds.length > 0 ? this.sortEachBuild(allBuilds) : [],
+      Headers: ["builds"].concat(this.getRange(this.state.fromDate, this.state.dayRange))
     };
   },
   groupBuildsOnTitle(allBuilds) {
+    if (allBuilds.length === 0) {
+      return;
+    }
+
+
     allBuilds.sort(function(a,b) {
-      return a[0].title - b[0].title;
+      if (a[0] && b[0]) {
+        return a[0].title  - b[0].title;
+      }
+      return a-b;
     });
   },
   getRange(start, range) {
@@ -51,11 +59,20 @@ JenkinJobs = React.createClass({
     allBuilds.forEach( builds => {
       builds.forEach( build => {
         let buildNumStr = build.statusTitle.match(/#([0-9]+)/g);
-        const buildNumber = parseInt(buildNumStr[0].slice(1,buildNumStr[0].length));
+        let buildNumber = 'none';
+        if (buildNumStr) {
+          buildNumber = buildNumStr[0].replace(/#/,' ').trim();
+        }
         const titleStatus = build.statusTitle.match(/\(([a-zA-Z?#(0-9)_ ]+)\)/g);
         const title = build.title;
         const buildConfig = build.title.match(/.*?^(?:(?!\/).)*/g)[0].replace(/-/gi,' ');
-        const buildConfigDesc = build.title.match(/\/([^=]+)/g)[0].replace(/[_\/]/g,' ').trim();
+        //problem with regex below ---
+        let buildConfigDesc = build.title.match(/\/([^=]+)/g);
+        if (buildConfigDesc) {
+          buildConfigDesc = buildConfigDesc[0].replace(/[_\/]/g,' ').trim();
+        } else {
+          buildConfigDesc = build.title;
+        }
         const buildLabels = _.map(build.title.match(/=([a-zA-Z0-9.-]+)/g), label => {
           return label.replace(/=/,' ').trim();
         });
@@ -67,14 +84,14 @@ JenkinJobs = React.createClass({
                                      buildLabels: buildLabels,
                                      configDesc: buildConfigDesc,
                                      buildStatus: this.getBuildStatus(titleStatus),
-                                     buildIndex: buildNumber});
+                                     buildNumber: buildNumber});
         } else {
           groupedBuilds[title] = [{build: build,
                                    configTitle: buildConfig,
                                    buildLabels: buildLabels,
                                    configDesc: buildConfigDesc,
                                    buildStatus: this.getBuildStatus(titleStatus),
-                                   buildIndex: buildNumber}];
+                                   buildNumber: buildNumber}];
         }
       });
    });
@@ -83,10 +100,6 @@ JenkinJobs = React.createClass({
       groupedBuilds[title].sort(function(a,b) {
         let A = new Date(a.build.pubDate);
         let B = new Date(b.build.pubDate);
-
-
-        console.log(B.getTime());
-
         if (A.getTime() > B.getTime()) {
           return -1;
         }
@@ -105,9 +118,22 @@ JenkinJobs = React.createClass({
             })}
           </ul>;
   },
+  getNearestDay(date) {
+    let moment = date.getTime();
+    const millTill_24 = moment%(1000*60*60*24);
+    console.log(date);
+    console.log(millTill_24/(1000*60*60));
+    console.log(new Date(moment+millTill_24));
+
+
+//    return moment+millTill_24;
+    return moment;
+  },
   getTableIndex(dateData, startDate) {
-    let timeDiff = Math.abs(startDate.getTime() - dateData.getTime());
-    return diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    let timeDiff = Math.abs(this.getNearestDay(startDate) - dateData.getTime());
+    let diff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+
   },
   parseCellData(buildData,headers) {
     var tableData = [];
@@ -130,15 +156,17 @@ JenkinJobs = React.createClass({
       return <td>
                <div style={cellWidth}>
                  {_.map(group, cellData => {
+                      let cellDate = cellData.build.pubDate.split(' ');
                       return (
-                        <div className="config-data">
+                        <div key={cellData._id} className="config-data">
                           <svg className="status-circle" width="10" height="10">
                             <circle cx="5" cy="5" r="5" fill={cellData.buildStatus ? 'green' : 'red'}/>
                           </svg>
                           <span className="cell-info">
-                            {cellData.build.pubDate}
-                            {this.displayBuildTags(cellData.build.build.tags)}
-                            build status: {cellData.buildStatus ? 'stable' : 'broken'}
+                            {cellDate[2]}&nbsp;
+                            {cellDate[4]}&nbsp;
+                            {cellDate[7]}<br/>
+                            {cellData.buildNumber}
                           </span>
                         </div>);
                    })
@@ -154,12 +182,12 @@ JenkinJobs = React.createClass({
       let buildAttr = this.data.Builds[build][0];
       buildGroups.push(
                        <tr>
-                          <td>
+                          <td className="row-header">
                              <p>
                                <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
                                {buildAttr.configDesc.toLowerCase()}: <br/>
-                               {buildAttr.buildLabels[0].toLowerCase()},&nbsp;
-                               {buildAttr.buildLabels[1].toLowerCase()}
+                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() : ''},&nbsp;
+                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
                           {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
@@ -176,7 +204,7 @@ JenkinJobs = React.createClass({
         const titleDate = title.toString().split(' ');
         displayTitle = titleDate[2]+'.'+titleDate[1]+'.'+titleDate[3];
       }
-      return <td>{displayTitle}</td>;
+      return <td className="data-table col-header">{displayTitle}</td>;
     });
   },
   render() {

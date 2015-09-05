@@ -20,3 +20,9 @@
   position: absolute;
   display: none;
 }
+
+.col-header {
+  text-align: center;
+  border-bottom: 1px solid grey;
+
+}
