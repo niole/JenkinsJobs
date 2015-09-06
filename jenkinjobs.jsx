@@ -2,20 +2,20 @@ JenkinJobs = React.createClass({
   getInitialState() {
     return { startIndex: 0,
              dayRange: 3,
-             fromDate: new Date()
+             fromDate: moment.tz("America/New_York").format('MMMM DD YYYY')
              };
 
   },
   mixins: [ReactMeteorData],
   getMeteorData () {
-    let startdate =new Date(this.state.fromDate.getTime() - this.state.dayRange*24*3600000);
+    let startdate =new Date((this.formatDate(this.state.fromDate)).getTime() - this.state.dayRange*24*3600000);
     let builds = Builds.find({}).fetch();
     let allBuilds = [];
       builds.forEach( build => {
       let buildArray = [];
       let postsInRange = Posts.find({ buildId: build._id }).fetch();
       postsInRange.forEach( post => {
-        if (post.build.pubDate <= this.state.fromDate && post.build.pubDate >= startdate) {
+        if (post.build.pubDate <= this.formatDate((this.formatDate(this.state.fromDate)).getTime()+24*36000000) && post.build.pubDate >= startdate) {
           buildArray.push(post);
         }
       });
@@ -25,8 +25,15 @@ JenkinJobs = React.createClass({
 
     return {
       Builds: allBuilds.length > 0 ? this.sortEachBuild(allBuilds) : [],
-      Headers: ["builds"].concat(this.getRange(this.state.fromDate, this.state.dayRange))
+      Headers: ["builds"].concat(this.getRange(this.formatDate(this.state.fromDate), this.state.dayRange))
     };
+  },
+  formatDate(date) {
+    if (typeof date === 'string' ||
+        typeof date === 'number') {
+      return new Date(date);
+    }
+    return date;
   },
   groupBuildsOnTitle(allBuilds) {
     if (allBuilds.length === 0) {
@@ -118,19 +125,8 @@ JenkinJobs = React.createClass({
             })}
           </ul>;
   },
-  getNearestDay(date) {
-    let moment = date.getTime();
-    const millTill_24 = moment%(1000*60*60*24);
-    console.log(date);
-    console.log(millTill_24/(1000*60*60));
-    console.log(new Date(moment+millTill_24));
-
-
-//    return moment+millTill_24;
-    return moment;
-  },
   getTableIndex(dateData, startDate) {
-    let timeDiff = Math.abs(this.getNearestDay(startDate) - dateData.getTime());
+    let timeDiff = Math.abs(startDate.getTime()+1000*60*60*24- dateData.getTime());
     let diff = Math.ceil(timeDiff / (1000 * 3600 * 24));
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
 
@@ -139,7 +135,7 @@ JenkinJobs = React.createClass({
     var tableData = [];
     for (var i=0; i<buildData.length; i++) {
         var data = buildData[i];
-        var tableIndex = this.getTableIndex(new Date(data.build.pubDate), headers[1])-1;
+        var tableIndex = this.getTableIndex(this.formatDate(data.build.pubDate), headers[1])-1;
         if (tableData[tableIndex]) {
           tableData[tableIndex].push(data);
         } else {
