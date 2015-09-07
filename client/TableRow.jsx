@@ -19,20 +19,54 @@ TableRow = React.createClass({
         _.min(buildDates).unix()
       ])
       .range([RADIUS, this.props.width - RADIUS]);
-    const buildStatusData = _.map(_.flatten(this.props.groupedData), (build) => {
+    const buildStatusData = _.map(this.props.groupedData, (build) => {
       return {
         cx: xScale(moment(build.build.pubDate).unix()),
-        color: build.buildStatus ? 'green' : 'red'
+        color: build.buildStatus ? 'green' : 'red',
+        buildNumber: build.buildNumber,
+        buildDate: build.build.pubDate
       };
     });
+
+var tt = d3.select("body")
+  .append("div")
+  .style("position", "absolute")
+  .style("z-index", "10")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
+
     svgContainer.selectAll("circle")
       .data(buildStatusData)
       .enter()
         .append("circle")
+        .classed('status-circle', true)
         .attr("cx", function (d) { return d.cx; })
         .attr("cy", function (d) { return "5px"; })
         .attr("r", function (d) { return RADIUS + "px"; })
-        .style("fill", function(d) { return d.color; });
+        .style("fill", function(d) { return d.color; })
+        .on("mouseover", function(d) {
+            tt.transition()
+                .duration(200)
+                .style("opacity", 1)
+                .text(d.buildNumber+" "+this.formatDate(d.buildDate))
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            }.bind(this))
+        .on("mouseout", function(d) {
+            tt.transition()
+                .duration(500)
+                .style("opacity", 0);
+        }.bind(this));
+  },
+  formatDate(date) {
+    let inProg = date;
+    if (typeof date === 'string' ||
+        typeof date === 'number') {
+      inProg = new Date(date);
+    }
+
+    return moment(inProg).format('LLL');
   },
   render() {
     return (
