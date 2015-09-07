@@ -145,37 +145,22 @@ JenkinJobs = React.createClass({
     return tableData;
   },
   buildBuildRow(headers, buildData) {
-
-    return this.parseCellData(buildData, headers).map( group => {
-      const cellWidth = {width: (group.length*10).toString()+"px"};
-
-      return <td>
-               <div style={cellWidth}>
-                 {_.map(group, cellData => {
-                      let cellDate = cellData.build.pubDate.split(' ');
-                      return (
-                        <div key={cellData._id} className="config-data">
-                          <svg className="status-circle" width="10" height="10">
-                            <circle cx="5" cy="5" r="5" fill={cellData.buildStatus ? 'green' : 'red'}/>
-                          </svg>
-                          <span className="cell-info">
-                            {cellDate[2]}&nbsp;
-                            {cellDate[4]}&nbsp;
-                            {cellDate[7]}<br/>
-                            {cellData.buildNumber}
-                          </span>
-                        </div>);
-                   })
-                }
-              </div>
-            </td>;
-    });
-
+    let width = 600;
+    let height = 25;
+      return <TableRow
+              groupedData={this.parseCellData(buildData,headers)}
+              buildId={"buildId-"+buildData[0].build.buildId}
+              dayRange={this.state.dayRange}
+              width={width}
+              height={height}
+             />;
   },
   displayBuildQs() {
     let buildGroups = [];
     for (let build in this.data.Builds) {
       let buildAttr = this.data.Builds[build][0];
+      console.log('buildAttr');
+      console.log(buildAttr);
       buildGroups.push(
                        <tr>
                           <td className="row-header">
@@ -186,7 +171,9 @@ JenkinJobs = React.createClass({
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
-                          {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
+                          <td>
+                            {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
+                          </td>
                        </tr>
                       );
     }
@@ -205,14 +192,16 @@ JenkinJobs = React.createClass({
   },
   render() {
     return (
-      <table>
-        <thead>
-          <tr>{this.displayColHeaders()}</tr>
-        </thead>
-        <tbody>
-          {this.displayBuildQs()}
-        </tbody>
-      </table>
+      <span>
+        <table>
+          <thead>
+            <tr>{this.displayColHeaders()}</tr>
+          </thead>
+          <tbody>
+            {this.displayBuildQs()}
+          </tbody>
+        </table>
+     </span>
     );
   }
 });
