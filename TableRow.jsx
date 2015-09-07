@@ -3,24 +3,29 @@ TableRow = React.createClass({
     buildId: React.PropTypes.string.isRequired,
     groupedData: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
-    dayRange: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired
   },
   componentDidMount() {
      const svgContainer = d3.select("#"+this.props.buildId).append("svg")
                                                       .attr("width", this.props.width)
                                                       .attr("height", this.props.height);
+       const dayScale = d3.scale.linear()
+                          .domain([0, this.props.groupedData.length])
+                          .range([0, this.props.width]);
+
        _.forEach(this.props.groupedData, (day, dayIdx) => {
-          const dayRange = this.props.dayRange;
-          const dayScale = d3.scale.linear()
-                             .domain([0, dayRange])
-                             .range([0, this.props.width]);
+         const cellScale = d3.scale.linear()
+                                 .domain([0, day.length])
+                                 .range([dayScale(dayIdx), dayScale(dayIdx+1)-10]);
 
           let cellDomain = day.map( (cellData, i) => {
-             const dayMax = day.length;
-             const cellScale = d3.scale.linear()
-                                     .domain([0, dayMax])
-                                     .range([dayScale(dayIdx), dayScale(dayIdx+1)-10]);
+            console.log('this.props.groupedData.length');
+
+            console.log(this.props.groupedData.length);
+            console.log('dayIdx');
+
+            console.log(dayIdx);
+
 
              return {xVal: cellScale(i), buildStatus: cellData.buildStatus};
 

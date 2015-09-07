@@ -150,7 +150,6 @@ JenkinJobs = React.createClass({
       return <TableRow
               groupedData={this.parseCellData(buildData,headers)}
               buildId={"buildId-"+buildData[0].build.buildId}
-              dayRange={this.state.dayRange}
               width={width}
               height={height}
              />;
