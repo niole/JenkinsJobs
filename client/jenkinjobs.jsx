@@ -25,7 +25,9 @@ JenkinJobs = React.createClass({
 
     return {
       Builds: allBuilds.length > 0 ? this.sortEachBuild(allBuilds) : [],
-      Headers: ["builds"].concat(this.getRange(this.formatDate(this.state.fromDate), this.state.dayRange))
+      Headers: ["builds"].concat(this.getRange(this.formatDate(this.state.fromDate), this.state.dayRange)),
+      Startdate: startdate,
+      Enddate: this.state.fromDate
     };
   },
   formatDate(date) {
@@ -103,31 +105,22 @@ JenkinJobs = React.createClass({
       });
    });
 
-    for (var title in groupedBuilds) {
-      groupedBuilds[title].sort(function(a,b) {
-        let A = new Date(a.build.pubDate);
-        let B = new Date(b.build.pubDate);
-        if (A.getTime() > B.getTime()) {
-          return -1;
-        }
-        if (A.getTime() < B.getTime()) {
-          return 1;
-        }
-        return 0;
-      });
-    }
+  for (var title in groupedBuilds) {
+    groupedBuilds[title].sort(function(a,b) {
+      let A = new Date(a.build.pubDate);
+      let B = new Date(b.build.pubDate);
+      if (A.getTime() > B.getTime()) {
+        return -1;
+      }
+      if (A.getTime() < B.getTime()) {
+        return 1;
+      }
+      return 0;
+    });
+  }
     return groupedBuilds;
   },
-  displayBuildTags() {
-    return <ul>
-           {arguments[0].map( tag => {
-              return <li>{tag}</li>;
-            })}
-          </ul>;
-  },
-  buildBuildRow(headers, buildData) {
-    let width = 600;
-    let height = 25;
+  buildBuildRow(width,height,headers, buildData) {
     return <TableRow
             groupedData={buildData}
             buildId={"buildId-"+buildData[0].build.buildId}
@@ -135,7 +128,7 @@ JenkinJobs = React.createClass({
             height={height}
            />;
   },
-  displayBuildQs() {
+  displayBuildQs(width,height) {
     let buildGroups = [];
     for (let build in this.data.Builds) {
       let buildAttr = this.data.Builds[build][0];
@@ -150,33 +143,52 @@ JenkinJobs = React.createClass({
                              </p>
                           </td>
                           <td>
-                            {this.buildBuildRow(this.data.Headers, this.data.Builds[build])}
+                            {this.buildBuildRow(width,height,this.data.Headers, this.data.Builds[build])}
                           </td>
                        </tr>
                       );
     }
     return buildGroups;
   },
-  displayColHeaders() {
-    return _.map(this.data.Headers, title => {
-      let displayTitle = title;
-      if (typeof title !== 'string') {
-        //formats title to day.month.year
-        const titleDate = title.toString().split(' ');
-        displayTitle = titleDate[2]+'.'+titleDate[1]+'.'+titleDate[3];
-      }
-      return <td className="data-table col-header">{displayTitle}</td>;
-    });
+  displayColHeaders( width, height,headers) {
+    return <TableAxis
+            startdate={this.data.Startdate}
+            enddate={this.data.Enddate}
+            width={width}
+            height={height}
+           />;
+
+//    return _.map(headers, title => {
+//      let displayTitle = title;
+//      if (typeof title !== 'string') {
+//        return <TableAxis
+//                startdate={this.data.Startdate}
+//                enddate={this.data.Enddate}
+//               />;
+//
+//
+//        //formats title to day.month.year
+//        const titleDate = title.toString().split(' ');
+//        displayTitle = titleDate[2]+'.'+titleDate[1]+'.'+titleDate[3];
+//
+//
+//
+//      }
+//      return <td className="data-table col-header">{displayTitle}</td>;
+//    });
   },
   render() {
+    const width = 600;
+    const height = 25;
+
     return (
       <span>
         <table>
           <thead>
-            <tr>{this.displayColHeaders()}</tr>
+            <tr>{this.displayColHeaders(width,height,this.data.Headers)}</tr>
           </thead>
           <tbody>
-            {this.displayBuildQs()}
+            {this.displayBuildQs(width,height)}
           </tbody>
         </table>
      </span>

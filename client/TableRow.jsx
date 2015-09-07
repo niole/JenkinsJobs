@@ -28,12 +28,12 @@ TableRow = React.createClass({
       };
     });
 
-var tt = d3.select("body")
-  .append("div")
-  .style("position", "absolute")
-  .style("z-index", "10")
-  .attr("class", "tooltip")
-  .style("opacity", 0);
+    const tt = d3.select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
 
 
     svgContainer.selectAll("circle")
@@ -49,7 +49,7 @@ var tt = d3.select("body")
             tt.transition()
                 .duration(200)
                 .style("opacity", 1)
-                .text(d.buildNumber+" "+this.formatDate(d.buildDate))
+                .text("build "+d.buildNumber+", "+this.formatDate(d.buildDate))
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             }.bind(this))
@@ -66,7 +66,7 @@ var tt = d3.select("body")
       inProg = new Date(date);
     }
 
-    return moment(inProg).format('LLL');
+    return moment(inProg).format('lll');
   },
   render() {
     return (
