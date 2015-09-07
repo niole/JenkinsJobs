@@ -125,41 +125,20 @@ JenkinJobs = React.createClass({
             })}
           </ul>;
   },
-  getTableIndex(dateData, startDate) {
-    let timeDiff = Math.abs(startDate.getTime()+1000*60*60*24- dateData.getTime());
-    let diff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-  },
-  parseCellData(buildData,headers) {
-    var tableData = [];
-    for (var i=0; i<buildData.length; i++) {
-        var data = buildData[i];
-        var tableIndex = this.getTableIndex(this.formatDate(data.build.pubDate), headers[1])-1;
-        if (tableData[tableIndex]) {
-          tableData[tableIndex].push(data);
-        } else {
-          tableData.push([data]);
-        }
-    }
-    return tableData;
-  },
   buildBuildRow(headers, buildData) {
     let width = 600;
     let height = 25;
-      return <TableRow
-              groupedData={this.parseCellData(buildData,headers)}
-              buildId={"buildId-"+buildData[0].build.buildId}
-              width={width}
-              height={height}
-             />;
+    return <TableRow
+            groupedData={buildData}
+            buildId={"buildId-"+buildData[0].build.buildId}
+            width={width}
+            height={height}
+           />;
   },
   displayBuildQs() {
     let buildGroups = [];
     for (let build in this.data.Builds) {
       let buildAttr = this.data.Builds[build][0];
-      console.log('buildAttr');
-      console.log(buildAttr);
       buildGroups.push(
                        <tr>
                           <td className="row-header">
