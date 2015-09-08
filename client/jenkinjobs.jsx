@@ -1,9 +1,9 @@
 JenkinJobs = React.createClass({
   getInitialState() {
-    return { startIndex: 0,
+    return {
              dayRange: 3,
              fromDate: moment.tz("America/New_York").format('MMMM DD YYYY')
-             };
+           };
 
   },
   mixins: [ReactMeteorData],
@@ -21,13 +21,20 @@ JenkinJobs = React.createClass({
       });
       allBuilds.push(buildArray);
     });
+
     this.groupBuildsOnTitle(allBuilds);
+
+    let allDates = _.flatten(allBuilds).sort( function(a,b) {
+      return (new Date(a.build.pubDate)).getTime()-(new Date(b.build.pubDate)).getTime();
+    });
 
     return {
       Builds: allBuilds.length > 0 ? this.sortEachBuild(allBuilds) : [],
-      Headers: ["builds"].concat(this.getRange(this.formatDate(this.state.fromDate), this.state.dayRange)),
       Startdate: startdate,
-      Enddate: this.state.fromDate
+      Enddate: this.state.fromDate,
+      Earliestbuild: allDates[0] ? allDates[0].build.pubDate : 0,
+      Latestbuild: allDates[allDates.length-1] ? allDates[allDates.length-1].build.pubDate : 0
+
     };
   },
   formatDate(date) {
@@ -41,20 +48,11 @@ JenkinJobs = React.createClass({
     if (allBuilds.length === 0) {
       return;
     }
-
-
     allBuilds.sort(function(a,b) {
       if (a[0] && b[0]) {
         return a[0].title  - b[0].title;
       }
       return a-b;
-    });
-  },
-  getRange(start, range) {
-    //assumes isodate objects
-    //range: days into the past, include current day
-    return _.range(range).map( mult => {
-      return new Date(start.getTime() - mult*24*3600000);
     });
   },
   getBuildStatus(titleArray) {
@@ -120,8 +118,10 @@ JenkinJobs = React.createClass({
   }
     return groupedBuilds;
   },
-  buildBuildRow(width,height,headers, buildData) {
+  buildBuildRow(firstBuild,lastBuild,width,height,headers, buildData) {
     return <TableRow
+            firstbuild={firstBuild}
+            lastbuild={lastBuild}
             groupedData={buildData}
             buildId={"buildId-"+buildData[0].build.buildId}
             width={width}
@@ -138,12 +138,12 @@ JenkinJobs = React.createClass({
                           <td className="row-header">
                              <p>
                                <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
-                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() +",": ''}&nbsp;
+                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() +", ": ''}
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
                           <td className="build-series">
-                            {this.buildBuildRow(width,height,this.data.Headers, this.data.Builds[build])}
+                            {this.buildBuildRow(this.data.Earliestbuild, this.data.Latestbuild, width,height,this.data.Headers, this.data.Builds[build])}
                           </td>
                        </tr>
                       );
@@ -164,7 +164,9 @@ JenkinJobs = React.createClass({
     const width = 600;
     const heightBuilds = 10;
     const height = 50;
-
+    console.log('this.data');
+    console.log(this.data.Earliestbuild);
+    console.log(this.data.Latestbuild);
 
     return (
       <span>

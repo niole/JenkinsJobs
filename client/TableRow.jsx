@@ -1,5 +1,7 @@
 TableRow = React.createClass({
   propTypes: {
+    firstbuild: React.PropTypes.object.isRequired,
+    lastbuild: React.PropTypes.object.isRequired,
     widthview: React.PropTypes.number.isRequired,
     buildId: React.PropTypes.string.isRequired,
     groupedData: React.PropTypes.array.isRequired,
@@ -16,8 +18,8 @@ TableRow = React.createClass({
     });
     const xScale = d3.scale.linear()
       .domain([
-        _.max(buildDates).unix(),
-        _.min(buildDates).unix()
+        moment(this.props.lastbuild).unix(),
+        moment(this.props.firstbuild).unix()
       ])
       .range([RADIUS+50, this.props.width - RADIUS+50]);
     const buildStatusData = _.map(this.props.groupedData, (build) => {
