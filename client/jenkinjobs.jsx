@@ -137,12 +137,11 @@ JenkinJobs = React.createClass({
                           <td className="row-header">
                              <p>
                                <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
-                               {buildAttr.configDesc.toLowerCase()}: <br/>
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() : ''},&nbsp;
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
-                          <td>
+                          <td className="build-series">
                             {this.buildBuildRow(width,height,this.data.Headers, this.data.Builds[build])}
                           </td>
                        </tr>
@@ -158,37 +157,26 @@ JenkinJobs = React.createClass({
             height={height}
            />;
 
-//    return _.map(headers, title => {
-//      let displayTitle = title;
-//      if (typeof title !== 'string') {
-//        return <TableAxis
-//                startdate={this.data.Startdate}
-//                enddate={this.data.Enddate}
-//               />;
-//
-//
-//        //formats title to day.month.year
-//        const titleDate = title.toString().split(' ');
-//        displayTitle = titleDate[2]+'.'+titleDate[1]+'.'+titleDate[3];
-//
-//
-//
-//      }
-//      return <td className="data-table col-header">{displayTitle}</td>;
-//    });
   },
   render() {
     const width = 600;
-    const height = 25;
+    const heightBuilds = 10;
+    const height = 50;
+
 
     return (
       <span>
         <table>
           <thead>
-            <tr>{this.displayColHeaders(width,height,this.data.Headers)}</tr>
+            <tr>
+              <td></td>
+              <td>
+                {this.displayColHeaders(width,height,this.data.Headers)}
+              </td>
+            </tr>
           </thead>
           <tbody>
-            {this.displayBuildQs(width,height)}
+            {this.displayBuildQs(width,heightBuilds)}
           </tbody>
         </table>
      </span>

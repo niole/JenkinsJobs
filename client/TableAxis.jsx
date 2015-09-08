@@ -3,39 +3,32 @@ TableAxis = React.createClass({
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     startdate: React.PropTypes.object.isRequired,
-    enddate: React.PropTypes.object.isRequired
+    enddate: React.PropTypes.object
   },
-  dateToNumber(date) {
-    return moment(date).unix();
-  },
+  //dateToNumber(date) {
+    //return moment(date).unix();
+  //},
   componentDidMount() {
     //Create the SVG Viewport
     const svgContainer = d3.select("#table-axis").append("svg")
                                .attr("width", this.props.width)
                                .attr("height", this.props.height);
+    const x = d3.time.scale()
+      .domain([
+        new Date(this.props.enddate),
+        new Date(this.props.startdate)
+      ])
+      .range([0, this.props.width]);
+    const xAxis = d3.svg.axis()
+      .scale(x)
+      .ticks(d3.time.day, 1)
+      .tickSize(16, 0)
+      .tickFormat(d3.time.format("%b %d"));
 
-    //Create the Scale we will use for the Axis
-    const axisScale = d3.scale.linear()
-                             .domain([
-                                this.dateToNumber(this.props.enddate),
-                                this.dateToNumber(this.props.startdate)
-                              ])
-                             .range([0, this.props.width]);
-
-    const axisData = _.map(this.getAxisData(this.props.enddate), tick => {
-      return {
-        moment: tick,
-        xPos: axisScale(tick.unix())
-      };
-    });
-
-    svgContainer.selectAll("circle")
-      .data(axisData)
-      .enter()
-        .append("circle")
-        .attr("cx", d => { return d.xPos; })
-        .attr("cy", "5px")
-        .attr("r", "2px");
+    svgContainer
+      .append("g")
+      .attr("class", "x axis")
+      .call(xAxis)
   },
   getAxisData(end) {
     //get just a range of days between these two and return
