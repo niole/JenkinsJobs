@@ -1,24 +1,21 @@
 TableAxis = React.createClass({
   propTypes: {
+    widthview: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     startdate: React.PropTypes.object.isRequired,
     enddate: React.PropTypes.object
   },
-  //dateToNumber(date) {
-    //return moment(date).unix();
-  //},
   componentDidMount() {
-    //Create the SVG Viewport
     const svgContainer = d3.select("#table-axis").append("svg")
-                               .attr("width", this.props.width)
+                               .attr("width", this.props.widthview)
                                .attr("height", this.props.height);
     const x = d3.time.scale()
       .domain([
         new Date(this.props.enddate),
         new Date(this.props.startdate)
       ])
-      .range([0, this.props.width]);
+      .range([50, this.props.width+50]);
     const xAxis = d3.svg.axis()
       .scale(x)
       .ticks(d3.time.day, 1)

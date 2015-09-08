@@ -125,6 +125,7 @@ JenkinJobs = React.createClass({
             groupedData={buildData}
             buildId={"buildId-"+buildData[0].build.buildId}
             width={width}
+            widthview={width+100}
             height={height}
            />;
   },
@@ -137,7 +138,7 @@ JenkinJobs = React.createClass({
                           <td className="row-header">
                              <p>
                                <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
-                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() : ''},&nbsp;
+                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() +",": ''}&nbsp;
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
@@ -153,6 +154,7 @@ JenkinJobs = React.createClass({
     return <TableAxis
             startdate={this.data.Startdate}
             enddate={this.data.Enddate}
+            widthview={width+100}
             width={width}
             height={height}
            />;

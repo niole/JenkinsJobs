@@ -1,5 +1,6 @@
 TableRow = React.createClass({
   propTypes: {
+    widthview: React.PropTypes.number.isRequired,
     buildId: React.PropTypes.string.isRequired,
     groupedData: React.PropTypes.array.isRequired,
     width: React.PropTypes.number.isRequired,
@@ -8,7 +9,7 @@ TableRow = React.createClass({
   componentDidMount() {
     const RADIUS = 5; // Pixels
     const svgContainer = d3.select("#"+this.props.buildId).append("svg")
-      .attr("width", this.props.width)
+      .attr("width", this.props.widthview)
       .attr("height", this.props.height);
     const buildDates = _.map(this.props.groupedData, (build) => {
       return moment(build.build.pubDate);
@@ -18,7 +19,7 @@ TableRow = React.createClass({
         _.max(buildDates).unix(),
         _.min(buildDates).unix()
       ])
-      .range([RADIUS, this.props.width - RADIUS]);
+      .range([RADIUS+50, this.props.width - RADIUS+50]);
     const buildStatusData = _.map(this.props.groupedData, (build) => {
       return {
         cx: xScale(moment(build.build.pubDate).unix()),
