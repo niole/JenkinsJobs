@@ -183,7 +183,7 @@ JenkinJobs = React.createClass({
             {this.displayBuildQs(width,heightBuilds)}
           </tbody>
         </table>
-      <i className="loyalty material-icons">made with love by Niole</i>
+        {'made with \u2661 by Niole'}
      </span>
     );
   }
