@@ -46,18 +46,8 @@ table {
   vertical-align: center;
 }
 
-.config-data {
-  float: left;
-  position: relative;
-}
-.status-circle:hover~.cell-info {
-  z-index: 999;
-  display: block;
-}
-
-.row-header {
-  float: right;
-  text-align: right;
+.build-type {
+  font-weight: 600;
 }
 
 .cell-info {
@@ -71,3 +61,20 @@ table {
   border-bottom: 1px solid grey;
 
 }
+
+.config-data {
+  float: left;
+  position: relative;
+}
+
+.status-circle:hover~.cell-info {
+  z-index: 999;
+  display: block;
+}
+
+.row-header {
+  float: right;
+  text-align: right;
+  white-space: nowrap;
+}
+

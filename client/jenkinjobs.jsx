@@ -8,6 +8,9 @@ JenkinJobs = React.createClass({
   },
   mixins: [ReactMeteorData],
   getMeteorData () {
+    let rowHeadWidth = $('.row-header')[0] ? $('.row-header')[0].offsetWidth : 125;
+    let dataWidth = Math.max( document.documentElement.clientWidth,
+                                                 window.innerWidth - rowHeadWidth*2 || 600 );
     let startdate =new Date((this.formatDate(this.state.fromDate)).getTime() - this.state.dayRange*24*3600000);
     let builds = Builds.find({}).fetch();
     let allBuilds = [];
@@ -33,7 +36,8 @@ JenkinJobs = React.createClass({
       Startdate: startdate,
       Enddate: this.state.fromDate,
       Earliestbuild: allDates[0] ? allDates[0].build.pubDate : 0,
-      Latestbuild: allDates[allDates.length-1] ? allDates[allDates.length-1].build.pubDate : 0
+      Latestbuild: allDates[allDates.length-1] ? allDates[allDates.length-1].build.pubDate : 0,
+      Datawidth: dataWidth
 
     };
   },
@@ -124,8 +128,8 @@ JenkinJobs = React.createClass({
             lastbuild={lastBuild}
             groupedData={buildData}
             buildId={"buildId-"+buildData[0].build.buildId}
-            width={width}
-            widthview={width+100}
+            width={width-150}
+            widthview={width}
             height={height}
            />;
   },
@@ -137,8 +141,8 @@ JenkinJobs = React.createClass({
                        <tr>
                           <td className="row-header">
                              <p>
-                               <strong>{buildAttr.configTitle.toLowerCase()}</strong><br/>
-                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() +", ": ''}
+                               <span className="build-type">{buildAttr.configTitle.toLowerCase()}</span><br/>
+                               {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[0].toLowerCase() +", ": <br/>}
                                {buildAttr.buildLabels.length > 0 ? buildAttr.buildLabels[1].toLowerCase() : ''}
                              </p>
                           </td>
@@ -154,23 +158,19 @@ JenkinJobs = React.createClass({
     return <TableAxis
             startdate={this.data.Startdate}
             enddate={this.data.Enddate}
-            widthview={width+100}
-            width={width}
+            widthview={width}
+            width={width-150}
             height={height}
            />;
 
   },
   render() {
-    const width = 600;
+    const width = this.data.Datawidth;
     const heightBuilds = 10;
     const height = 50;
-    console.log('this.data');
-    console.log(this.data.Earliestbuild);
-    console.log(this.data.Latestbuild);
-
     return (
       <span>
-        <table>
+        <table className="striped">
           <thead>
             <tr>
               <td></td>
@@ -183,6 +183,7 @@ JenkinJobs = React.createClass({
             {this.displayBuildQs(width,heightBuilds)}
           </tbody>
         </table>
+      <i className="loyalty material-icons">made with love by Niole</i>
      </span>
     );
   }
