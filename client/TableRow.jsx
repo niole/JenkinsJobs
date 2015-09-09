@@ -23,11 +23,13 @@ TableRow = React.createClass({
       ])
       .range([RADIUS+50, this.props.width - RADIUS+50]);
     const buildStatusData = _.map(this.props.groupedData, (build) => {
+      console.log(build.build.build.link);
       return {
         cx: xScale(moment(build.build.pubDate).unix()),
         color: build.buildStatus ? 'green' : 'red',
         buildNumber: build.buildNumber,
-        buildDate: build.build.pubDate
+        buildDate: build.build.pubDate,
+        link: build.build.build.link
       };
     });
 
@@ -42,6 +44,9 @@ TableRow = React.createClass({
     svgContainer.selectAll("circle")
       .data(buildStatusData)
       .enter()
+        .append("svg:a")
+        .attr("xlink:href", function(d){return d.link;})
+
         .append("circle")
         .classed('status-circle', true)
         .attr("cx", function (d) { return d.cx; })
@@ -49,6 +54,7 @@ TableRow = React.createClass({
         .attr("r", function (d) { return RADIUS + "px"; })
         .style("fill", function(d) { return d.color; })
         .on("mouseover", function(d) {
+
             tt.transition()
                 .duration(200)
                 .style("opacity", 1)
