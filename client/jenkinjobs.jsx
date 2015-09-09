@@ -6,6 +6,11 @@ JenkinJobs = React.createClass({
            };
 
   },
+  componentDidMount() {
+  //  const div = document.getElementById('spinner');
+  //  Blaze.renderWithData(Template.spinner, {}, div);
+
+  },
   mixins: [ReactMeteorData],
   getMeteorData () {
     let rowHeadWidth = $('.row-header')[0] ? $('.row-header')[0].offsetWidth : 125;

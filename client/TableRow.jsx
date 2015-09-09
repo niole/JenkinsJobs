@@ -9,6 +9,7 @@ TableRow = React.createClass({
     height: React.PropTypes.number.isRequired
   },
   componentDidMount() {
+
     const RADIUS = 5; // Pixels
     const svgContainer = d3.select("#"+this.props.buildId).append("svg")
       .attr("width", this.props.widthview)
@@ -23,7 +24,6 @@ TableRow = React.createClass({
       ])
       .range([RADIUS+50, this.props.width - RADIUS+50]);
     const buildStatusData = _.map(this.props.groupedData, (build) => {
-      console.log(build.build.build.link);
       return {
         cx: xScale(moment(build.build.pubDate).unix()),
         color: build.buildStatus ? 'green' : 'red',
@@ -46,6 +46,7 @@ TableRow = React.createClass({
       .enter()
         .append("svg:a")
         .attr("xlink:href", function(d){return d.link;})
+        .attr("target", "_blank")
 
         .append("circle")
         .classed('status-circle', true)
@@ -79,13 +80,16 @@ TableRow = React.createClass({
   },
   render() {
     return (
-      React.createElement('div', {
-                                 style: {
-                                  width: this.props.width,
-                                  height: this.props.height
-                                 },
-                                 id: this.props.buildId
-                                 })
+      React.createElement('span',{},
+        React.createElement('div',{ id: 'spinner' }),
+        React.createElement('div', {
+                                   style: {
+                                    width: this.props.width,
+                                    height: this.props.height
+                                   },
+                                   id: this.props.buildId
+                                   })
+      )
     );
   }
 });
