@@ -8,50 +8,36 @@ TableRow = React.createClass({
     width: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired
   },
-  componentDidMount() {
-    function createCORSRequest(method, url) {
-      var xhr = new XMLHttpRequest();
-      if ("withCredentials" in xhr) {
-        // XHR for Chrome/Firefox/Opera/Safari.
-        xhr.open(method, url, true);
-      } else if (typeof XDomainRequest != "undefined") {
-        // XDomainRequest for IE.
-        xhr = new XDomainRequest();
-        xhr.open(method, url);
-      } else {
-        // CORS not supported.
-        xhr = null;
-      }
-      return xhr;
-    }
-
-    // Helper method to parse the title tag from the response.
-    function getTitle(text) {
-      return text.match('<title>(.*)?</title>')[1];
-    }
-
+  mixins: [ReactMeteorData],
+  getMeteorData() {
+    const buttonData = BuildViews.find({buildId: this.props.buildId}).fetch();
     const RADIUS = 5; // Pixels
-    const svgContainer = d3.select("#"+this.props.buildId).append("svg")
-      .attr("width", this.props.widthview)
-      .attr("height", this.props.height);
-    const buildDates = _.map(this.props.groupedData, (build) => {
-      return moment(build.build.pubDate);
-    });
     const xScale = d3.scale.linear()
       .domain([
         moment(this.props.lastbuild).unix(),
         moment(this.props.firstbuild).unix()
       ])
       .range([RADIUS+50, this.props.width - RADIUS+50]);
+
     const buildStatusData = _.map(this.props.groupedData, (build) => {
+      const buttonData = BuildViews.findOne({instanceId: build.build._id});
       return {
         cx: xScale(moment(build.build.pubDate).unix()),
         color: build.buildStatus ? 'green' : 'red',
         buildNumber: build.buildNumber,
         buildDate: build.build.pubDate,
-        link: build.build.build.link
-      };
+        failCount: buttonData ? buttonData.testInfo.failCount : '... pending'
+      }
     });
+    return {
+      Buttondata: buildStatusData
+    };
+  },
+  componentDidMount() {
+    const RADIUS = 5; // Pixels
+    const svgContainer = d3.select("#"+this.props.buildId).append("svg")
+      .attr("width", this.props.widthview)
+      .attr("height", this.props.height);
 
     const tt = d3.select("body")
       .append("div")
@@ -60,9 +46,8 @@ TableRow = React.createClass({
       .attr("class", "tooltip")
       .style("opacity", 0);
 
-
     svgContainer.selectAll("circle")
-      .data(buildStatusData)
+      .data(this.data.Buttondata)
       .enter()
         .append("svg:a")
         .attr("xlink:href", function(d){return d.link;})
@@ -74,21 +59,12 @@ TableRow = React.createClass({
         .attr("r", function (d) { return RADIUS + "px"; })
         .style("fill", function(d) { return d.color; })
         .on("mouseover", function(d) {
-            Meteor.call('getTests', d.link+"/testReport/api/json",
-              function(err, res) {
-              if (err) {
-                throw Error(err);
-              } else {
-                console.log(res);
-                tt.text("build "+d.buildNumber+", "+this.formatDate(d.buildDate) +", "+res.failCount.toString())
-              }
-            }.bind(this))
-
-
             tt.transition()
                 .duration(200)
+                .text('build '+d.buildNumber
+                        +', '+d.buildDate
+                        +', failures: '+d.failCount)
                 .style("opacity", 1)
-
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             }.bind(this))

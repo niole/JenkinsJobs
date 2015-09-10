@@ -20,12 +20,10 @@ JenkinJobs = React.createClass({
     let builds = Builds.find({}).fetch();
     let allBuilds = [];
       builds.forEach( build => {
-      let buildArray = [];
-      let postsInRange = Posts.find({ buildId: build._id }).fetch();
-      postsInRange.forEach( post => {
-        if (post.build.pubDate <= this.formatDate((this.formatDate(this.state.fromDate)).getTime()+24*36000000) && post.build.pubDate >= startdate) {
-          buildArray.push(post);
-        }
+     // let buildArray = [];
+      let buildsPosts = Posts.find({ buildId: build._id }).fetch();
+      let buildArray = _.filter(buildsPosts, post => {
+        return post.build.pubDate <= this.formatDate((this.formatDate(this.state.fromDate)).getTime()+24*36000000) && post.build.pubDate >= startdate;
       });
       allBuilds.push(buildArray);
     });
@@ -70,6 +68,14 @@ JenkinJobs = React.createClass({
     }
     return true;
   },
+  createFailureData(buildStatus, link, buildId, instanceId) {
+    Meteor.call('getTests', link+"/testReport/api/json", buildStatus, buildId, instanceId,
+      function(err, res) {
+        if (err) {
+          throw Error(err);
+        }
+    });
+  },
   sortEachBuild(allBuilds) {
     let groupedBuilds = {};
     allBuilds.forEach( builds => {
@@ -93,20 +99,21 @@ JenkinJobs = React.createClass({
           return label.replace(/=/,' ').trim();
         });
 
-
+        let buildStatus = this.getBuildStatus(titleStatus);
+        this.createFailureData(buildStatus, build.build.link, build.buildId, build._id);
         if (groupedBuilds[title]) { groupedBuilds[title].push({
                                      build: build,
                                      configTitle: buildConfig,
                                      buildLabels: buildLabels,
                                      configDesc: buildConfigDesc,
-                                     buildStatus: this.getBuildStatus(titleStatus),
+                                     buildStatus: buildStatus,
                                      buildNumber: buildNumber});
         } else {
           groupedBuilds[title] = [{build: build,
                                    configTitle: buildConfig,
                                    buildLabels: buildLabels,
                                    configDesc: buildConfigDesc,
-                                   buildStatus: this.getBuildStatus(titleStatus),
+                                   buildStatus: buildStatus,
                                    buildNumber: buildNumber}];
         }
       });
