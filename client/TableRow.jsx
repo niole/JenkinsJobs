@@ -9,6 +9,26 @@ TableRow = React.createClass({
     height: React.PropTypes.number.isRequired
   },
   componentDidMount() {
+    function createCORSRequest(method, url) {
+      var xhr = new XMLHttpRequest();
+      if ("withCredentials" in xhr) {
+        // XHR for Chrome/Firefox/Opera/Safari.
+        xhr.open(method, url, true);
+      } else if (typeof XDomainRequest != "undefined") {
+        // XDomainRequest for IE.
+        xhr = new XDomainRequest();
+        xhr.open(method, url);
+      } else {
+        // CORS not supported.
+        xhr = null;
+      }
+      return xhr;
+    }
+
+    // Helper method to parse the title tag from the response.
+    function getTitle(text) {
+      return text.match('<title>(.*)?</title>')[1];
+    }
 
     const RADIUS = 5; // Pixels
     const svgContainer = d3.select("#"+this.props.buildId).append("svg")
@@ -55,6 +75,10 @@ TableRow = React.createClass({
         .attr("r", function (d) { return RADIUS + "px"; })
         .style("fill", function(d) { return d.color; })
         .on("mouseover", function(d) {
+          Meteor.call('getTests', d.link+"/testReport/api/json",
+            function(err, res) {
+              console.log(res);
+          });
 
             tt.transition()
                 .duration(200)

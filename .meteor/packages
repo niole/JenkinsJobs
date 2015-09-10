@@ -17,3 +17,4 @@ momentjs:moment
 erasaur:meteor-lodash
 mrt:moment-timezone
 materialize:materialize
+http
