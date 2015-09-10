@@ -1,8 +1,8 @@
 Meteor.startup(function() {
   var Feeds = [
-                "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/rssAll"
+    //            "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/rssAll"
 //              "https://amplab.cs.berkeley.edu/jenkins/view/All/rssAll"
-//               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop1.0,label=spark-test/rssAll",
+               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop1.0,label=spark-test/rssAll",
 //               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop2.2,label=spark-test/rssAll",
 //               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop2.0,label=spark-test/rssAll",
 //               "https://amplab.cs.berkeley.edu/jenkins/view/Spark-QA-Test/job/Spark-Master-SBT/AMPLAB_JENKINS_BUILD_PROFILE=hadoop2.3,label=spark-test/rssAll"

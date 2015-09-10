@@ -67,7 +67,6 @@ TableRow = React.createClass({
         .append("svg:a")
         .attr("xlink:href", function(d){return d.link;})
         .attr("target", "_blank")
-
         .append("circle")
         .classed('status-circle', true)
         .attr("cx", function (d) { return d.cx; })
@@ -75,15 +74,21 @@ TableRow = React.createClass({
         .attr("r", function (d) { return RADIUS + "px"; })
         .style("fill", function(d) { return d.color; })
         .on("mouseover", function(d) {
-          Meteor.call('getTests', d.link+"/testReport/api/json",
-            function(err, res) {
-              console.log(res);
-          });
+            Meteor.call('getTests', d.link+"/testReport/api/json",
+              function(err, res) {
+              if (err) {
+                throw Error(err);
+              } else {
+                console.log(res);
+                tt.text("build "+d.buildNumber+", "+this.formatDate(d.buildDate) +", "+res.failCount.toString())
+              }
+            }.bind(this))
+
 
             tt.transition()
                 .duration(200)
                 .style("opacity", 1)
-                .text("build "+d.buildNumber+", "+this.formatDate(d.buildDate))
+
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             }.bind(this))
