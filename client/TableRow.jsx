@@ -11,6 +11,7 @@ TableRow = React.createClass({
   mixins: [ReactMeteorData],
   getMeteorData() {
     const buttonData = BuildViews.find({buildId: this.props.buildId}).fetch();
+    console.log('rerendering row data with buildId :'+this.props.buildId);
     const RADIUS = 5; // Pixels
     const xScale = d3.scale.linear()
       .domain([
@@ -26,6 +27,7 @@ TableRow = React.createClass({
         color: build.buildStatus ? 'green' : 'red',
         buildNumber: build.buildNumber,
         buildDate: build.build.pubDate,
+        link: build.build.build.link,
         failCount: buttonData ? buttonData.testInfo.failCount : '... pending'
       }
     });
