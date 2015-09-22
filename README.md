@@ -1,3 +1,3 @@
 # JenkinsJobs
 
-### clone this repo and run `meteor` command in root directory. App should be running on port 3000.
+run `meteor` in app's root directory. app runs on port 3000.
